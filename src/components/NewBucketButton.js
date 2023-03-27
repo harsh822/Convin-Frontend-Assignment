@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import { Button, Modal, Input, Form, Card } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 function NewBucketButton() {
+  const Buckets = [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputField, setInputField] = useState([]);
+  const [bucket, setBuckets] = useState([]);
   const [bucketForm] = Form.useForm();
 
   const showModal = () => {
@@ -18,10 +20,10 @@ function NewBucketButton() {
 
   const onFinish = (values) => {
     setInputField([...inputField, { title: values.title }]);
-    let input = JSON.parse(localStorage.getItem("inputFields")) || [];
-    console.log("Input", input, typeof input);
-    input.push({ title: values.title });
-    localStorage.setItem("inputFields", JSON.stringify(input));
+    // let input = JSON.parse(localStorage.getItem("inputFields")) || [];
+    // console.log("Input", input, typeof input);
+    // input.push({ title: values.title });
+    // localStorage.setItem("inputFields", JSON.stringify(input));
     bucketForm.resetFields();
     handleCancel();
     console.log("Success:", values);
