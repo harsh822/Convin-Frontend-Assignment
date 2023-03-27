@@ -3,12 +3,13 @@ import AddBucket from "./AddBucket";
 import React, { useState } from "react";
 import { Button, Modal, Input, Form, Card } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
+import Buckets from "./Buckets";
+import { v1 as uuidv1 } from "uuid";
 function NewBucketButton() {
-  const Buckets = [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputField, setInputField] = useState([]);
-  const [bucket, setBuckets] = useState([]);
   const [bucketForm] = Form.useForm();
+  console.log("Buckets in create bucket component", Buckets);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -20,10 +21,9 @@ function NewBucketButton() {
 
   const onFinish = (values) => {
     setInputField([...inputField, { title: values.title }]);
-    // let input = JSON.parse(localStorage.getItem("inputFields")) || [];
-    // console.log("Input", input, typeof input);
-    // input.push({ title: values.title });
-    // localStorage.setItem("inputFields", JSON.stringify(input));
+    const uniqueId = uuidv1().slice(0, 8);
+    console.log("uniqueId,,", uniqueId);
+    Buckets.push({ id: uniqueId, title: values.title, cards: [] });
     bucketForm.resetFields();
     handleCancel();
     console.log("Success:", values);
@@ -72,7 +72,7 @@ function NewBucketButton() {
           </Form.Item>
         </Form>
       </Modal>
-      <AddBucket inputField={inputField}></AddBucket>
+      <AddBucket></AddBucket>
     </>
   );
 }

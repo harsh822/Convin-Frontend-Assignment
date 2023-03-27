@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./VideoCard.css";
+import Buckets from "./Buckets";
 import { Card, Col, Row, Button, Modal, Input, Form } from "antd";
 import $ from "jquery";
 const { Meta } = Card;
@@ -7,6 +8,7 @@ function VideoCard(props) {
   const [videoDetails, setVideoDetails] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   console.log("cardDetails", props);
+  console.log("FinalBuckets", Buckets);
   function youtube_parser(url) {
     var regExp =
       /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -34,7 +36,7 @@ function VideoCard(props) {
   return (
     <>
       <Row className="bucketRow" gutter={16} style={{ padding: "15px" }}>
-        {props.cardDetails.map((val, i) => (
+        {props.cardDetails.cards.map((val, i) => (
           <Col span={12} key={i} style={{ paddingBottom: "15px" }}>
             <Card
               hoverable
