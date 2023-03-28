@@ -1,14 +1,18 @@
 import React, { useState } from "react";
 import { Card, Col, Row, Button, Modal, Input, Form } from "antd";
 import VideoCard from "./VideoCard";
-import Buckets from "./Buckets";
+import { useSelector, useDispatch } from "react-redux";
+import { addCard } from "../redux/BucketSlice";
 function AddBucket() {
+  const dispatch = useDispatch();
+  const bucketList = useSelector((state) => state.buckets.value);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cardDetails, setCardDetails] = useState([]);
+  const [bucketId, setBucketId] = useState(1);
   const [cardForm] = Form.useForm();
-  let bucketId = 0;
-  const showModal = () => {
-    // bucketId = id;
+  const showModal = (bucketID) => {
+    setBucketId(bucketID);
     setIsModalOpen(true);
   };
 
@@ -17,22 +21,28 @@ function AddBucket() {
   };
 
   const onFinish = (values) => {
+    console.log(
+      "CARDSSSS",
+      bucketList.filter((bucket) => bucket.id === bucketId),
+      bucketId
+    );
+    dispatch(
+      addCard({
+        id: bucketId,
+        card: {
+          id:
+            bucketList.filter((bucket) => bucket.id === bucketId)[0].cards
+              .length + 1,
+          videoName: values.videoName,
+          videoLink: values.videoLink,
+        },
+      })
+    );
+
     setCardDetails([
       ...cardDetails,
       { videoName: values.videoName, videoLink: values.videoLink },
     ]);
-    // let newCardId = bucketId + 1;
-    let currBucketIdx = Buckets.indexOf(
-      Buckets.find((element) => {
-        return element.id === bucketId;
-      })
-    );
-    Buckets[currBucketIdx].cards.push({
-      id: Buckets[currBucketIdx].cards.length + 1,
-      videoName: values.videoName,
-      videoLink: values.videoLink,
-    });
-    console.log("currBucket", Buckets[currBucketIdx]);
     cardForm.resetFields();
     handleCancel();
     console.log("Success:", values);
@@ -42,30 +52,22 @@ function AddBucket() {
     console.log("Failed:", errorInfo);
   };
 
-  function currBucketIdSetter(id) {
-    bucketId = id;
-  }
-
   return (
     <>
       <Row className="bucketRow" gutter={16} style={{ padding: "15px" }}>
-        {Buckets.map((val, i) => (
-          <Col span={10} key={val.id}>
+        {bucketList.map((bucket, i) => (
+          <Col span={10} key={bucket.id}>
             <Card
-              title={val.title}
+              title={bucket.title}
               extra={
-                <Button
-                  type="primary"
-                  onClick={showModal}
-                  onChange={currBucketIdSetter(val.id)}
-                >
+                <Button type="primary" onClick={() => showModal(bucket.id)}>
                   Add New Card
                 </Button>
               }
               bordered={false}
-              key={val.id}
+              key={bucket.id}
             >
-              <VideoCard cardDetails={val}></VideoCard>
+              <VideoCard bucketIdx={i}></VideoCard>
             </Card>
           </Col>
         ))}
@@ -73,7 +75,6 @@ function AddBucket() {
       <Modal
         title="Enter Card Details"
         open={isModalOpen}
-        // onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
       >

@@ -3,13 +3,16 @@ import AddBucket from "./AddBucket";
 import React, { useState } from "react";
 import { Button, Modal, Input, Form, Card } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
-import Buckets from "./Buckets";
-import { v1 as uuidv1 } from "uuid";
+import { useSelector, useDispatch } from "react-redux";
+import { addBucket } from "../redux/BucketSlice";
+
 function NewBucketButton() {
+  const dispatch = useDispatch();
+  const bucketList = useSelector((state) => state.buckets.value);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputField, setInputField] = useState([]);
   const [bucketForm] = Form.useForm();
-  console.log("Buckets in create bucket component", Buckets);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -20,10 +23,16 @@ function NewBucketButton() {
   };
 
   const onFinish = (values) => {
+    dispatch(
+      addBucket({
+        id:
+          bucketList.length == 0 ? 1 : bucketList[bucketList.length - 1].id + 1,
+        title: values.title,
+        cards: [],
+      })
+    );
+
     setInputField([...inputField, { title: values.title }]);
-    const uniqueId = uuidv1().slice(0, 8);
-    console.log("uniqueId,,", uniqueId);
-    Buckets.push({ id: uniqueId, title: values.title, cards: [] });
     bucketForm.resetFields();
     handleCancel();
     console.log("Success:", values);
@@ -39,13 +48,7 @@ function NewBucketButton() {
           <PlusCircleOutlined />
         </Button>
       </div>
-      <Modal
-        title="Enter Bucket title"
-        open={isModalOpen}
-        // onOk={handleOk}
-        onCancel={handleCancel}
-        footer={null}
-      >
+      <Modal title="Enter Bucket title" open={isModalOpen} footer={null}>
         <Form
           name="bucket"
           form={bucketForm}
