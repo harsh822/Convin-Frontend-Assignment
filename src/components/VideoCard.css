@@ -8,6 +8,6 @@
     overflow: hidden;
 }
 .cardBottom {
-    display: flex;
+  display: flex;
   justify-content: space-between;
 }

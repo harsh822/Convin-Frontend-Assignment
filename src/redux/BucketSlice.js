@@ -48,9 +48,18 @@ export const bucketSlice = createSlice({
         }
       });
     },
+    moveCard: (state, action) => {
+      console.log("Action", action);
+      state.value.map((bucket) => {});
+    },
   },
 });
 
-export const { addBucket, addCard, deleteBucketCard, updateBucketCard } =
-  bucketSlice.actions;
+export const {
+  addBucket,
+  addCard,
+  deleteBucketCard,
+  updateBucketCard,
+  moveCard,
+} = bucketSlice.actions;
 export default bucketSlice.reducer;

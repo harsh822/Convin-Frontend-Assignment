@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import "./VideoCard.css";
-import Buckets from "./Buckets";
 import { Card, Col, Row, Button, Modal, Input, Form, Dropdown } from "antd";
 import { DeleteOutlined, EditOutlined, SendOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
-import { deleteBucketCard, updateBucketCard } from "../redux/BucketSlice";
+import {
+  deleteBucketCard,
+  updateBucketCard,
+  addCard,
+} from "../redux/BucketSlice";
 import $ from "jquery";
+import { addHistory } from "../redux/HistorySlice";
 const { Meta } = Card;
 function VideoCard(props) {
   const dispatch = useDispatch();
@@ -18,46 +22,60 @@ function VideoCard(props) {
   const [isUpdateModalOpen, setUpdateIsModalOpen] = useState(false);
   const [updateBucketId, setUpdateBucketId] = useState();
   const [updateCardId, setUpdateCardId] = useState();
+  const [moveFromBucketId, setmoveFromBucketId] = useState();
+  const [moveFromCardId, setmoveFromCardId] = useState();
   const [cardForm] = Form.useForm();
 
-  const items = [
-    {
-      key: "1",
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.antgroup.com"
-        >
-          1st menu item
-        </a>
-      ),
-    },
-    {
-      key: "2",
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.aliyun.com"
-        >
-          2nd menu item
-        </a>
-      ),
-    },
-    {
-      key: "3",
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          3rd menu item
-        </a>
-      ),
-    },
-  ];
+  const items = [];
+
+  bucketList.forEach((bucket, i) => {
+    let itemObj = {};
+    itemObj.key = i + "";
+    itemObj.bucketIdx = i;
+    itemObj.cards = bucket.cards;
+    itemObj.label = (
+      <a target="_blank" rel="noopener noreferrer">
+        Move to {i + 1} Bucket
+      </a>
+    );
+    items.push(itemObj);
+  });
+
+  const onClick = ({ key }) => {
+    let newCard = {};
+    bucketList.map((bucket) => {
+      if (bucket.id == moveFromBucketId) {
+        bucket.cards.map((card) => {
+          if (card.id == moveFromCardId) {
+            newCard = card;
+          }
+        });
+      }
+    });
+    console.log("NEW CARD", newCard);
+    dispatch(
+      deleteBucketCard({
+        bucketId: moveFromBucketId,
+        cardId: moveFromCardId,
+      })
+    );
+    let clonedCard = Object.assign({}, newCard);
+    clonedCard.id = bucketList[parseInt(key)].cards.length + 1;
+    dispatch(
+      addCard({
+        id: bucketList[parseInt(key)].id,
+        card: clonedCard,
+      })
+    );
+  };
+
+  console.log(items);
+
+  function getMoveCardDetails(bucket, cardId) {
+    console.log("move card details", bucket, cardId);
+    setmoveFromCardId(cardId);
+    setmoveFromBucketId(bucket.id);
+  }
 
   function urlToThumbnailConvertor(url) {
     var regExp =
@@ -67,15 +85,44 @@ function VideoCard(props) {
     return match && match[7].length == 11 ? match[7] : false;
   }
 
+  function getVideoId(url) {
+    var regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    var match = url.match(regExp);
+
+    if (match && match[2].length == 11) {
+      return match[2];
+    } else {
+      return "error";
+    }
+  }
+
   const showModal = () => {
     setIsModalOpen(true);
     $("#ytplayer").attr("src", videoDetails.videoLink);
   };
   const handleCancel = () => {
+    let currentTime = new Date().toLocaleString();
+    dispatch(
+      addHistory({
+        videoName: videoDetails.videoName,
+        videoLink: videoDetails.videoLink,
+        currentTime: currentTime,
+      })
+    );
     setIsModalOpen(false);
     stopPlaying();
   };
   const handleOk = () => {
+    console.log("Video DETAILSS", videoDetails);
+    let currentTime = new Date().toLocaleString();
+    dispatch(
+      addHistory({
+        videoName: videoDetails.videoName,
+        videoLink: videoDetails.videoLink,
+        currentTime: currentTime,
+      })
+    );
     setIsModalOpen(false);
     stopPlaying();
   };
@@ -127,7 +174,7 @@ function VideoCard(props) {
                       id: val.id,
                       videoLink:
                         "https://www.youtube.com/embed/" +
-                        val.videoLink.split("=")[1].split("&")[0],
+                        getVideoId(val.videoLink),
                       videoName: val.videoName,
                     });
                     showModal();
@@ -155,14 +202,19 @@ function VideoCard(props) {
                         })
                       );
                     }}
-                  />
+                  />{" "}
                   &nbsp;
                   <Dropdown
                     menu={{
                       items,
+                      onClick,
                     }}
                     placement="bottomLeft"
                     arrow
+                    trigger={["click"]}
+                    onClick={() =>
+                      getMoveCardDetails(bucketList[props.bucketIdx], val.id)
+                    }
                   >
                     <SendOutlined style={{ color: "blue" }} />
                   </Dropdown>

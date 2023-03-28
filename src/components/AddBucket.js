@@ -60,7 +60,11 @@ function AddBucket() {
             <Card
               title={bucket.title}
               extra={
-                <Button type="primary" onClick={() => showModal(bucket.id)}>
+                <Button
+                  type="primary"
+                  danger
+                  onClick={() => showModal(bucket.id)}
+                >
                   Add New Card
                 </Button>
               }

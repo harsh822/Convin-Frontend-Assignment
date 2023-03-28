@@ -1,7 +1,7 @@
 import "./NewBucketButton.css";
 import AddBucket from "./AddBucket";
 import React, { useState } from "react";
-import { Button, Modal, Input, Form, Card } from "antd";
+import { Button, Modal, Input, Form, Card, Drawer } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import { addBucket } from "../redux/BucketSlice";
@@ -9,10 +9,20 @@ import { addBucket } from "../redux/BucketSlice";
 function NewBucketButton() {
   const dispatch = useDispatch();
   const bucketList = useSelector((state) => state.buckets.value);
+  const historyList = useSelector((state) => state.history.value);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputField, setInputField] = useState([]);
+  const [open, setOpen] = useState(false);
   const [bucketForm] = Form.useForm();
+
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -47,6 +57,9 @@ function NewBucketButton() {
           Create New Bucket
           <PlusCircleOutlined />
         </Button>
+        <Button type="primary" onClick={showDrawer}>
+          Open History
+        </Button>
       </div>
       <Modal title="Enter Bucket title" open={isModalOpen} footer={null}>
         <Form
@@ -76,6 +89,33 @@ function NewBucketButton() {
         </Form>
       </Modal>
       <AddBucket></AddBucket>
+
+      {/* History Drawer  */}
+      <Drawer
+        title="History"
+        placement="right"
+        onClose={onClose}
+        open={open}
+        size={"large"}
+      >
+        <table>
+          <tr>
+            <th>Name</th>
+            <th style={{ width: "30" }}>Url</th>
+            <th>Time</th>
+          </tr>
+          {historyList.map((history, index) => {
+            console.log("history", index, history);
+            return (
+              <tr key={index}>
+                <td>{history.videoName}</td>
+                <td>{history.videoLink}</td>
+                <td>{history.currentTime}</td>
+              </tr>
+            );
+          })}
+        </table>
+      </Drawer>
     </>
   );
 }
